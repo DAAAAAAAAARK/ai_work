@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>校园生活规划助手</title>
+  <style>
+    /* =========================
+       校园生活规划助手
+       单文件版本：HTML + CSS + JavaScript
+       主题：聊天软件式校园规划助手
+    ========================= */
+
+    :root {
+      --primary: #2EAFB0;
+      --primary-dark: #168B8C;
+      --primary-soft: #E8F8F8;
+      --sidebar-bg: #F5F7FA;
+      --body-bg: #EDF4F7;
+      --white: #FFFFFF;
+      --text: #172033;
+      --muted: #6B7280;
+      --line: #E5EAF0;
+      --online: #20C565;
+      --danger: #FF6B6B;
+      --user-bubble: #2EAFB0;
+      --bot-bubble: #FFFFFF;
+      --shadow: 0 20px 55px rgba(30, 55, 80, 0.14);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: "PingFang SC", "Microsoft YaHei", "HarmonyOS Sans SC", "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 8%, rgba(46, 175, 176, 0.22), transparent 28%),
+        radial-gradient(circle at 92% 12%, rgba(72, 198, 239, 0.16), transparent 28%),
+        linear-gradient(135deg, #F8FCFD 0%, var(--body-bg) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      background: none;
+      cursor: pointer;
+    }
+
+    .app {
+      width: min(1200px, 100%);
+      height: min(780px, calc(100vh - 44px));
+      min-height: 620px;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.78);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    /* =========================
+       左侧联系人栏
+    ========================= */
+
+    .sidebar {
+      min-width: 0;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand {
+      height: 92px;
+      padding: 18px 18px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      border-radius: 15px;
+      display: grid;
+      place-items: center;
+      color: #FFFFFF;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, var(--primary), #8AE3D8);
+      box-shadow: 0 10px 22px rgba(46, 175, 176, 0.32);
+    }
+
+    .brand h1 {
+      font-size: 17px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .brand p {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .search-box {
+      margin: 14px 14px 6px;
+      height: 38px;
+      border-radius: 999px;
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 13px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .contact-list {
+      padding: 8px 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contact {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 18px;
+      text-align: left;
+      color: var(--text);
+      transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .contact:hover {
+      background: rgba(46, 175, 176, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .contact.active {
+      color: #FFFFFF;
+      background: linear-gradient(135deg, var(--primary), #43C6C7);
+      box-shadow: 0 14px 30px rgba(46, 175, 176, 0.30);
+    }
+
+    .contact-avatar {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      border-radius: 16px;
+      background: #FFFFFF;
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.05);
+    }
+
+    .contact.active .contact-avatar {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .contact-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .contact-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .contact-name {
+      font-size: 15px;
+      font-weight: 850;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .contact-time {
+      flex: 0 0 auto;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .contact.active .contact-time {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    .contact-status {
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .contact.active .contact-status {
+      color: rgba(255, 255, 255, 0.88);
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--online);
+      box-shadow: 0 0 0 3px rgba(32, 197, 101, 0.16);
+    }
+
+    .sidebar-note {
+      margin-top: auto;
+      padding: 14px 18px 20px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    /* =========================
+       右侧聊天窗口
+    ========================= */
+
+    .chat {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.84), rgba(248, 252, 253, 0.96)),
+        radial-gradient(circle at 100% 0%, rgba(46, 175, 176, 0.14), transparent 30%);
+    }
+
+    .chat-header {
+      height: 92px;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(255, 255, 255, 0.86);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+      z-index: 2;
+    }
+
+    .chat-title {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      min-width: 0;
+    }
+
+    .chat-icon {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: var(--primary-soft);
+      font-size: 25px;
+    }
+
+    .chat-title h2 {
+      font-size: 20px;
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .chat-title p {
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* 虚拟数字人卡片 */
+    .digital-human {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px 8px 9px;
+      border-radius: 999px;
+      color: #126D6E;
+      background: var(--primary-soft);
+      border: 1px solid rgba(46, 175, 176, 0.16);
+      white-space: nowrap;
+    }
+
+    .human-face {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 26%, rgba(255, 255, 255, 0.95) 0 10%, transparent 11%),
+        linear-gradient(145deg, #A9F2E8, var(--primary));
+      box-shadow: 0 9px 20px rgba(46, 175, 176, 0.25);
+    }
+
+    .human-face::before,
+    .human-face::after {
+      content: "";
+      position: absolute;
+      top: 17px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #124244;
+    }
+
+    .human-face::before {
+      left: 13px;
+    }
+
+    .human-face::after {
+      right: 13px;
+    }
+
+    .human-mouth {
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      width: 13px;
+      height: 7px;
+      border-bottom: 2px solid #124244;
+      border-radius: 0 0 14px 14px;
+      transform: translateX(-50%);
+    }
+
+    .digital-human.thinking .human-face {
+      animation: breathe 1.15s ease-in-out infinite;
+    }
+
+    .digital-human.thinking .human-face::after {
+      animation: blink 1.15s ease-in-out infinite;
+    }
+
+    .human-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 12px;
+    }
+
+    .human-name {
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    .human-state {
+      color: #367B7C;
+    }
+
+    @keyframes breathe {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(46, 175, 176, 0.35), 0 9px 20px rgba(46, 175, 176, 0.25);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(46, 175, 176, 0.08), 0 14px 25px rgba(46, 175, 176, 0.30);
+      }
+    }
+
+    @keyframes blink {
+      0%, 88%, 100% {
+        transform: scaleY(1);
+      }
+      92%, 96% {
+        transform: scaleY(0.12);
+      }
+    }
+
+    .messages-wrap {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .conversation {
+      height: 100%;
+      display: none;
+      overflow-y: auto;
+      padding: 24px;
+      scroll-behavior: smooth;
+    }
+
+    .conversation.active {
+      display: block;
+    }
+
+    .conversation::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .conversation::-webkit-scrollbar-thumb {
+      background: rgba(46, 175, 176, 0.24);
+      border-radius: 999px;
+    }
+
+    .tips-card {
+      margin-bottom: 20px;
+      padding: 14px 16px;
+      border: 1px solid rgba(46, 175, 176, 0.14);
+      border-radius: 18px;
+      background: rgba(232, 248, 248, 0.72);
+      color: #245F60;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      margin: 15px 0;
+    }
+
+    .message.user {
+      justify-content: flex-end;
+    }
+
+    .message.bot {
+      justify-content: flex-start;
+    }
+
+    .message-avatar {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--primary-soft);
+      font-size: 17px;
+    }
+
+    .message.user .message-avatar {
+      order: 2;
+      background: #DBEAFE;
+      color: #2563EB;
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .bubble {
+      max-width: min(68%, 650px);
+      padding: 12px 15px;
+      border-radius: 18px;
+      font-size: 15px;
+      line-height: 1.65;
+      word-break: break-word;
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.06);
+    }
+
+    .message.bot .bubble {
+      background: var(--bot-bubble);
+      border: 1px solid var(--line);
+      border-bottom-left-radius: 6px;
+    }
+
+    .message.user .bubble {
+      color: #FFFFFF;
+      background: linear-gradient(135deg, var(--user-bubble), #46C5C6);
+      border-bottom-right-radius: 6px;
+    }
+
+    .time {
+      margin-top: 6px;
+      font-size: 11px;
+      opacity: 0.62;
+    }
+
+    .typing {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      height: 20px;
+    }
+
+    .typing span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary);
+      animation: typing 1s ease-in-out infinite;
+    }
+
+    .typing span:nth-child(2) {
+      animation-delay: 0.14s;
+    }
+
+    .typing span:nth-child(3) {
+      animation-delay: 0.28s;
+    }
+
+    @keyframes typing {
+      0%, 80%, 100% {
+        transform: translateY(0);
+        opacity: 0.42;
+      }
+      40% {
+        transform: translateY(-5px);
+        opacity: 1;
+      }
+    }
+
+    .coze-box {
+      margin: 22px 0 8px;
+      padding: 15px 16px;
+      border-radius: 18px;
+      border: 1px dashed rgba(46, 175, 176, 0.42);
+      background: rgba(255, 255, 255, 0.76);
+      color: #527075;
+      font-size: 13px;
+      line-height: 1.75;
+    }
+
+    .coze-box strong {
+      color: var(--primary-dark);
+    }
+
+    .input-bar {
+      padding: 16px 22px 20px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.92);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .input-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tool-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: #F3F7F9;
+      color: #5F7280;
+      transition: 0.2s ease;
+    }
+
+    .tool-btn:hover {
+      color: var(--primary-dark);
+      background: var(--primary-soft);
+    }
+
+    .chat-input {
+      flex: 1;
+      min-width: 0;
+      height: 48px;
+      padding: 0 16px;
+      border-radius: 999px;
+      border: 1px solid #D8E2EA;
+      outline: none;
+      background: #F9FBFC;
+      color: var(--text);
+      transition: 0.2s ease;
+    }
+
+    .chat-input:focus {
+      border-color: rgba(46, 175, 176, 0.75);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 4px rgba(46, 175, 176, 0.10);
+    }
+
+    .send-btn {
+      height: 48px;
+      padding: 0 22px;
+      border-radius: 999px;
+      color: #FFFFFF;
+      background: var(--primary);
+      font-weight: 900;
+      box-shadow: 0 11px 24px rgba(46, 175, 176, 0.28);
+      transition: 0.2s ease;
+    }
+
+    .send-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .send-btn:active {
+      transform: translateY(0);
+    }
+
+    /* =========================
+       响应式布局
+    ========================= */
+
+    @media (max-width: 850px) {
+      body {
+        padding: 0;
+      }
+
+      .app {
+        width: 100%;
+        height: 100vh;
+        min-height: 0;
+        border-radius: 0;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        height: 70px;
+        padding: 12px 14px 8px;
+        border-bottom: 0;
+      }
+
+      .logo {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+        border-radius: 13px;
+      }
+
+      .brand h1 {
+        font-size: 16px;
+      }
+
+      .brand p,
+      .search-box,
+      .sidebar-note {
+        display: none;
+      }
+
+      .contact-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 8px 12px 12px;
+        gap: 8px;
+      }
+
+      .contact {
+        width: auto;
+        min-width: 148px;
+        padding: 10px;
+      }
+
+      .contact-avatar {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+        border-radius: 14px;
+        font-size: 20px;
+      }
+
+      .contact-name {
+        font-size: 13px;
+      }
+
+      .contact-time {
+        display: none;
+      }
+
+      .contact-status {
+        font-size: 11px;
+      }
+
+      .chat-header {
+        height: 78px;
+        padding: 12px 14px;
+      }
+
+      .chat-icon {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+        border-radius: 16px;
+      }
+
+      .chat-title h2 {
+        font-size: 17px;
+      }
+
+      .chat-title p {
+        font-size: 12px;
+      }
+
+      .digital-human {
+        padding: 6px;
+      }
+
+      .human-face {
+        width: 38px;
+        height: 38px;
+      }
+
+      .human-face::before {
+        left: 11px;
+        top: 15px;
+      }
+
+      .human-face::after {
+        right: 11px;
+        top: 15px;
+      }
+
+      .human-mouth {
+        bottom: 9px;
+      }
+
+      .human-meta {
+        display: none;
+      }
+
+      .conversation {
+        padding: 16px 14px;
+      }
+
+      .bubble {
+        max-width: 78%;
+        font-size: 14px;
+      }
+
+      .input-bar {
+        padding: 12px;
+      }
+
+      .input-tools {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .contact {
+        min-width: 132px;
+      }
+
+      .message-avatar {
+        display: none;
+      }
+
+      .bubble {
+        max-width: 88%;
+      }
+
+      .chat-input,
+      .send-btn {
+        height: 44px;
+      }
+
+      .send-btn {
+        padding: 0 17px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <!-- 左侧边栏：联系人列表 -->
+    <aside class="sidebar">
+      <section class="brand">
+        <div class="logo">AI</div>
+        <div>
+          <h1>校园生活规划助手</h1>
+          <p>你的大学生活智能规划站</p>
+        </div>
+      </section>
+
+      <div class="search-box">
+        <span>🔎</span>
+        <span>搜索规划师或校园任务</span>
+      </div>
+
+      <nav class="contact-list" aria-label="联系人列表">
+        <button class="contact active" type="button" data-bot="diet">
+          <span class="contact-avatar">🍎</span>
+          <span class="contact-main">
+            <span class="contact-name-row">
+              <span class="contact-name">饮食规划师</span>
+              <span class="contact-time">现在</span>
+            </span>
+            <span class="contact-status"><span class="dot"></span>在线</span>
+          </span>
+        </button>
+
+        <button class="contact" type="button" data-bot="fitness">
+          <span class="contact-avatar">💪</span>
+          <span class="contact-main">
+            <span class="contact-name-row">
+              <span class="contact-name">健身规划师</span>
+              <span class="contact-time">现在</span>
+            </span>
+            <span class="contact-status"><span class="dot"></span>在线</span>
+          </span>
+        </button>
+
+        <button class="contact" type="button" data-bot="study">
+          <span class="contact-avatar">📚</span>
+          <span class="contact-main">
+            <span class="contact-name-row">
+              <span class="contact-name">学习规划师</span>
+              <span class="contact-time">现在</span>
+            </span>
+            <span class="contact-status"><span class="dot"></span>在线</span>
+          </span>
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        三个会话相互独立。切换联系人后，右侧聊天窗口会显示对应规划师的历史消息和 Coze 嵌入区域。
+      </div>
+    </aside>
+
+    <!-- 右侧主区域：聊天窗口 -->
+    <section class="chat">
+      <header class="chat-header">
+        <div class="chat-title">
+          <div class="chat-icon" id="chatIcon">🍎</div>
+          <div>
+            <h2 id="chatName">饮食规划师</h2>
+            <p><span class="dot"></span><span id="chatStatus">在线 · 帮你规划健康饮食</span></p>
+          </div>
+        </div>
+
+        <div class="digital-human" id="digitalHuman">
+          <div class="human-face" aria-hidden="true">
+            <span class="human-mouth"></span>
+          </div>
+          <div class="human-meta">
+            <span class="human-name">小助手</span>
+            <span class="human-state" id="humanState">随时待命</span>
+          </div>
+        </div>
+      </header>
+
+      <div class="messages-wrap">
+        <!-- 饮食 Bot 会话 -->
+        <section class="conversation active" data-room="diet">
+          <div class="tips-card">
+            当前会话是饮食规划师。适合咨询食堂搭配、减脂餐、增肌餐、早餐选择、夜宵控制和一周饮食安排。
+          </div>
+
+          <div class="message bot">
+            <div class="message-avatar">🍎</div>
+            <div class="bubble">
+              你好，我是饮食规划师。告诉我你的饮食目标、预算、作息和忌口，我可以帮你制定更适合校园生活的饮食计划。
+              <div class="time">系统消息</div>
+            </div>
+          </div>
+
+          <div class="coze-box">
+            <strong>Coze Chat SDK 嵌入区</strong><br />
+            <!-- 在此处嵌入饮食Bot Chat SDK -->
+            将你从 Coze 复制的饮食 Bot Chat SDK 粘贴到这里。建议让 SDK 容器宽度为 100%，高度根据聊天区自适应。
+          </div>
+        </section>
+
+        <!-- 健身 Bot 会话 -->
+        <section class="conversation" data-room="fitness">
+          <div class="tips-card">
+            当前会话是健身规划师。适合咨询宿舍训练、操场跑步、健身房计划、体态改善、拉伸恢复和运动打卡。
+          </div>
+
+          <div class="message bot">
+            <div class="message-avatar">💪</div>
+            <div class="bubble">
+              你好，我是健身规划师。告诉我你的运动基础、目标、可用器械和每周可训练时间，我会帮你安排容易坚持的训练计划。
+              <div class="time">系统消息</div>
+            </div>
+          </div>
+
+          <div class="coze-box">
+            <strong>Coze Chat SDK 嵌入区</strong><br />
+            <!-- 在此处嵌入健身Bot Chat SDK -->
+            将你从 Coze 复制的健身 Bot Chat SDK 粘贴到这里。可保留 Coze 标准聊天窗口，并把主题色调整为 #2EAFB0。
+          </div>
+        </section>
+
+        <!-- 学习 Bot 会话 -->
+        <section class="conversation" data-room="study">
+          <div class="tips-card">
+            当前会话是学习规划师。适合咨询考试复习、课程安排、论文推进、ddl 管理、自习计划和时间分配。
+          </div>
+
+          <div class="message bot">
+            <div class="message-avatar">📚</div>
+            <div class="bubble">
+              你好，我是学习规划师。告诉我你的课程、考试时间、ddl 和每天可学习时长，我可以帮你拆解任务并安排复习节奏。
+              <div class="time">系统消息</div>
+            </div>
+          </div>
+
+          <div class="coze-box">
+            <strong>Coze Chat SDK 嵌入区</strong><br />
+            <!-- 在此处嵌入学习Bot Chat SDK -->
+            将你从 Coze 复制的学习 Bot Chat SDK 粘贴到这里。建议把 SDK 聊天窗口与当前页面圆角、阴影和蓝绿色主色保持一致。
+          </div>
+        </section>
+      </div>
+
+      <!-- 底部输入区 -->
+      <form class="input-bar" id="chatForm">
+        <div class="input-tools" aria-hidden="true">
+          <button class="tool-btn" type="button" title="表情">😊</button>
+          <button class="tool-btn" type="button" title="清单">📝</button>
+        </div>
+        <input
+          class="chat-input"
+          id="chatInput"
+          type="text"
+          autocomplete="off"
+          placeholder="输入你的问题，例如：帮我制定一周食堂饮食计划"
+        />
+        <button class="send-btn" type="submit">发送</button>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    /*
+      功能说明：
+      1. 三个联系人分别对应饮食、健身、学习三个会话。
+      2. 每个会话的 DOM 独立保存，切换时不会清空聊天内容。
+      3. 当前 getBotReply() 使用本地模拟回复，便于直接打开 index.html 预览。
+      4. 正式接入 Coze 时，建议使用后端代理调用 Coze API，避免在前端暴露 Token。
+      5. 如果使用 Coze Chat SDK，把 SDK 代码粘贴到对应会话的注释位置即可。
+    */
+
+    const bots = {
+      diet: {
+        icon: "🍎",
+        name: "饮食规划师",
+        status: "在线 · 帮你规划健康饮食",
+        placeholder: "输入你的问题，例如：帮我制定一周食堂饮食计划"
+      },
+      fitness: {
+        icon: "💪",
+        name: "健身规划师",
+        status: "在线 · 帮你安排运动节奏",
+        placeholder: "输入你的问题，例如：宿舍里怎么练核心？"
+      },
+      study: {
+        icon: "📚",
+        name: "学习规划师",
+        status: "在线 · 帮你拆解学习任务",
+        placeholder: "输入你的问题，例如：两周后考试该怎么复习？"
+      }
+    };
+
+    let currentBot = "diet";
+
+    const contacts = document.querySelectorAll(".contact");
+    const rooms = document.querySelectorAll(".conversation");
+    const chatIcon = document.getElementById("chatIcon");
+    const chatName = document.getElementById("chatName");
+    const chatStatus = document.getElementById("chatStatus");
+    const chatForm = document.getElementById("chatForm");
+    const chatInput = document.getElementById("chatInput");
+    const digitalHuman = document.getElementById("digitalHuman");
+    const humanState = document.getElementById("humanState");
+
+    contacts.forEach((contact) => {
+      contact.addEventListener("click", () => {
+        switchBot(contact.dataset.bot);
+      });
+    });
+
+    chatForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      addMessage(currentBot, "user", text);
+      chatInput.value = "";
+
+      const typingId = showTyping(currentBot);
+      setThinking(true);
+
+      try {
+        const reply = await getBotReply(currentBot, text);
+        removeTyping(typingId);
+        addMessage(currentBot, "bot", reply);
+      } catch (error) {
+        removeTyping(typingId);
+        addMessage(currentBot, "bot", "暂时没有获取到回复。请检查 Coze Bot API 或 Chat SDK 的接入配置。");
+        console.error(error);
+      } finally {
+        setThinking(false);
+      }
+    });
+
+    function switchBot(botKey) {
+      currentBot = botKey;
+      const bot = bots[botKey];
+
+      contacts.forEach((contact) => {
+        contact.classList.toggle("active", contact.dataset.bot === botKey);
+      });
+
+      rooms.forEach((room) => {
+        room.classList.toggle("active", room.dataset.room === botKey);
+      });
+
+      chatIcon.textContent = bot.icon;
+      chatName.textContent = bot.name;
+      chatStatus.textContent = bot.status;
+      chatInput.placeholder = bot.placeholder;
+      setThinking(false);
+      scrollToBottom();
+      chatInput.focus();
+    }
+
+    function addMessage(botKey, role, text) {
+      const room = getRoom(botKey);
+      const bot = bots[botKey];
+      const message = document.createElement("div");
+      const avatar = document.createElement("div");
+      const bubble = document.createElement("div");
+      const time = document.createElement("div");
+
+      message.className = `message ${role}`;
+      avatar.className = "message-avatar";
+      avatar.textContent = role === "user" ? "我" : bot.icon;
+      bubble.className = "bubble";
+      bubble.textContent = text;
+      time.className = "time";
+      time.textContent = currentTime();
+
+      bubble.appendChild(time);
+      message.appendChild(avatar);
+      message.appendChild(bubble);
+      room.appendChild(message);
+
+      scrollToBottom();
+    }
+
+    function showTyping(botKey) {
+      const room = getRoom(botKey);
+      const bot = bots[botKey];
+      const id = `typing-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      const message = document.createElement("div");
+
+      message.className = "message bot";
+      message.dataset.typing = id;
+      message.innerHTML = `
+        <div class="message-avatar">${bot.icon}</div>
+        <div class="bubble">
+          <span class="typing" aria-label="正在输入">
+            <span></span><span></span><span></span>
+          </span>
+        </div>
+      `;
+
+      room.appendChild(message);
+      scrollToBottom();
+      return id;
+    }
+
+    function removeTyping(id) {
+      const node = document.querySelector(`[data-typing="${id}"]`);
+      if (node) node.remove();
+    }
+
+    function setThinking(isThinking) {
+      digitalHuman.classList.toggle("thinking", isThinking);
+      humanState.textContent = isThinking ? "正在思考..." : "随时待命";
+    }
+
+    function getRoom(botKey) {
+      return document.querySelector(`[data-room="${botKey}"]`);
+    }
+
+    function scrollToBottom() {
+      const room = getRoom(currentBot);
+      if (!room) return;
+
+      requestAnimationFrame(() => {
+        room.scrollTop = room.scrollHeight;
+      });
+    }
+
+    function currentTime() {
+      const now = new Date();
+      return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    }
+
+    async function getBotReply(botKey, userMessage) {
+      /*
+        推荐的 Coze API 接入方式：
+
+        const response = await fetch("/api/coze-chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            botType: botKey,
+            message: userMessage
+          })
+        });
+
+        const data = await response.json();
+        return data.reply;
+
+        注意：
+        - 不建议把 Coze Token 直接写在 index.html 里。
+        - 建议后端根据 botType 分别转发到饮食、健身、学习三个 Coze Bot。
+        - 如果使用 Coze Chat SDK，可直接将 SDK 代码嵌入到页面上方的对应注释区域。
+      */
+
+      await new Promise((resolve) => setTimeout(resolve, 700));
+
+      const content = userMessage.replace(/\s+/g, " ");
+      const replies = {
+        diet: `我已收到你的饮食问题：“${content}”。建议先确认目标、预算、忌口和食堂可选窗口，再按早餐、午餐、晚餐和加餐拆分。你可以继续补充身高、体重、运动频率，我会给你更具体的校园饮食方案。`,
+        fitness: `我已收到你的健身问题：“${content}”。建议从每周 3 次训练开始，每次包含热身、主训练和拉伸。你可以继续告诉我训练场地、器械条件和目标，我会帮你细化到每天的训练动作。`,
+        study: `我已收到你的学习问题：“${content}”。建议先列出课程、考试日期、ddl 和薄弱点，再拆成每天可完成的小任务。你可以继续补充时间表，我会帮你安排复习节奏。`
+      };
+
+      return replies[botKey];
+    }
+
+    scrollToBottom();
+  </script>
+</body>
+</html>
